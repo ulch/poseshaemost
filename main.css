@@ -1,0 +1,267 @@
+/* === ПЕРЕМЕННЫЕ ЦВЕТОВ === */
+:root {
+    --body-bg: #f0f0f0;
+    --text-color: #191818;
+    --header-bg: #4a5a6a;
+    --card-bg: white;
+    --card-text: #191818;
+    --card-border: #4a5a6a;
+    --link-color: #0056b3;
+    --link-hover: #003d82;
+    --disabled-link: #999;
+    --btn-login-bg: #28a745;
+    --btn-login-hover: #218838;
+    --btn-logout-bg: #dc3545;
+    --btn-logout-hover: #c82333;
+    --modal-bg: white;
+    --input-border: #ddd;
+    --panel-bg: white;
+}
+
+body.dark-mode {
+    --body-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --header-bg: #2c3e50;
+    --card-bg: #2d2d2d;
+    --card-text: #e0e0e0;
+    --card-border: #e0e0e0;
+    --link-color: #8ab4f8;
+    --link-hover: #aecbfa;
+    --disabled-link: #666;
+    --btn-login-bg: #28a745;
+    --btn-login-hover: #218838;
+    --btn-logout-bg: #dc3545;
+    --btn-logout-hover: #c82333;
+    --modal-bg: #2d2d2d;
+    --input-border: #555;
+    --panel-bg: #2d2d2d;
+}
+
+body {
+    background-color: var(--body-bg);
+    color: var(--text-color);
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Шапка */
+.group-header {
+    background-color: var(--header-bg);
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.group-header h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.org-name {
+    font-size: 14px;
+    color: #ffffff;
+    margin-bottom: 5px;
+    font-weight: normal;
+}
+
+/* Карточка списка групп */
+.disciplines-card {
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.disciplines-card h2 {
+    color: var(--card-text);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--card-border);
+}
+
+/* Список групп */
+.groups-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.groups-list li {
+    margin-bottom: 12px;
+}
+
+.groups-list li a {
+    text-decoration: none;
+    font-size: 18px;
+    color: var(--link-color);
+    transition: color 0.2s;
+    cursor: pointer;
+}
+
+.groups-list li a:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
+}
+
+.groups-list li a.disabled {
+    color: var(--disabled-link);
+    cursor: not-allowed;
+    pointer-events: none;
+    text-decoration: none;
+}
+
+/* Контейнер для кнопок (тема + вход) */
+.auth-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Кнопка переключения темы */
+.theme-toggle-btn {
+    background: none;
+    border: 1px solid var(--text-color);
+    color: var(--text-color);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+.theme-toggle-btn:hover {
+    background: var(--text-color);
+    color: var(--body-bg);
+}
+
+/* Кнопка входа / выхода */
+.login-btn {
+    background-color: var(--btn-login-bg);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.login-btn:hover {
+    background-color: var(--btn-login-hover);
+}
+
+.logout-btn {
+    background-color: var(--btn-logout-bg);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background-color: var(--btn-logout-hover);
+}
+
+/* Панель добавления группы */
+.add-group-panel {
+    display: none;
+    background-color: var(--panel-bg);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    align-items: center;
+    gap: 10px;
+}
+
+.add-group-panel.visible {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.add-group-panel input {
+    padding: 8px 12px;
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    flex: 1 1 200px;
+}
+
+.add-group-panel button {
+    padding: 8px 16px;
+    background-color: var(--btn-login-bg);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.add-group-panel button:hover {
+    background-color: var(--btn-login-hover);
+}
+
+/* Модальное окно */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: var(--modal-bg);
+    margin: 10% auto;
+    padding: 25px;
+    width: 300px;
+    border-radius: 8px;
+    position: relative;
+    color: var(--text-color);
+}
+
+.close {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+.modal-content input {
+    display: block;
+    width: 90%;
+    margin: 10px auto;
+    padding: 8px;
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.modal-content button {
+    display: block;
+    width: 95%;
+    margin: 15px auto;
+    padding: 8px;
+    background-color: var(--btn-login-bg);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modal-content button:hover {
+    background-color: var(--btn-login-hover);
+}

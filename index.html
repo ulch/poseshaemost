@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Посещаемость групп</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+
+    <!-- Кнопки темы и входа -->
+    <div class="auth-container">
+        <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme()">
+            🌙 Тёмная тема
+        </button>
+        <button class="login-btn" id="authButton" onclick="handleAuthClick()">Войти для просмотра</button>
+    </div>
+
+    <!-- Панель добавления группы (видна только после входа) -->
+    <div class="add-group-panel" id="addGroupPanel">
+        <input type="text" id="newGroupName" placeholder="Название новой группы">
+        <button onclick="addCustomGroup()">＋ Добавить группу</button>
+    </div>
+
+    <!-- Шапка -->
+    <div class="group-header">
+        <p class="org-name">Русско-Азиатский экономико-правовой колледж</p>
+        <h1>Посещаемость студентов</h1>
+    </div>
+
+    <!-- Карточка со списком групп -->
+    <div class="disciplines-card">
+        <h2>📋 Списки групп</h2>
+        <ul class="groups-list" id="groupsList">
+            <!-- Заполняется через JS -->
+        </ul>
+    </div>
+
+    <!-- Модальное окно входа -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>Вход для просмотра</h3>
+            <input type="text" id="username" placeholder="Логин" value="admin">
+            <input type="password" id="password" placeholder="Пароль" value="12345">
+            <button onclick="login()">Войти</button>
+            <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                * Логин: admin, пароль: 12345
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ========== ПЕРЕМЕННЫЕ ==========
+        // Стандартные группы (ссылки на отдельные HTML-файлы)
+        const standardGroups = ["КИО-25-9", "КЭО-25-9", "КТО-25-9"];
+        let loggedIn = false;
+        let customGroups = [];   // добавляемые пользователем
+
+        // ========== ТЕМА ==========
+        function applyTheme() {
+            const theme = localStorage.getItem('theme') || 'light';
+            const button = document.getElementById('themeToggle');
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                button.textContent = '☀️ Светлая тема';
+            } else {
+                document.body.classList.remove('dark-mode');
+                button.textContent = '🌙 Тёмная тема';
+            }
+        }
+
+        function toggleTheme() {
+            if (document.body.classList.contains('dark-mode')) {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            }
+            applyTheme();
+        }
+
+        // ========== ЗАГРУЗКА КАСТОМНЫХ ГРУПП ==========
+        function loadCustomGroups() {
+            const stored = localStorage.getItem('customGroups');
+            if (stored) {
+                try {
+                    customGroups = JSON.parse(stored);
+                } catch (e) {
+                    customGroups = [];
+                }
+            } else {
+                customGroups = [];
+            }
+        }
+
+        function saveCustomGroups() {
+            localStorage.setItem('customGroups', JSON.stringify(customGroups));
+        }
+
+        // ========== АВТОРИЗАЦИЯ ==========
+        function checkAuthState() {
+            loggedIn = (localStorage.getItem('viewerLoggedIn') === 'true');
+            updateUI();
+        }
+
+        function updateUI() {
+            const authButton = document.getElementById('authButton');
+            const addPanel = document.getElementById('addGroupPanel');
+            const links = document.querySelectorAll('#groupsList a');
+
+            if (loggedIn) {
+                authButton.textContent = 'Выйти';
+                authButton.className = 'logout-btn';
+                addPanel.classList.add('visible');
+                // Разблокируем ссылки
+                links.forEach(link => {
+                    link.classList.remove('disabled');
+                    link.href = link.dataset.href;
+                });
+            } else {
+                authButton.textContent = 'Войти для просмотра';
+                authButton.className = 'login-btn';
+                addPanel.classList.remove('visible');
+                links.forEach(link => {
+                    link.classList.add('disabled');
+                    link.removeAttribute('href');
+                });
+            }
+        }
+
+        // ========== ОТРИСОВКА СПИСКА ГРУПП ==========
+        function renderGroups() {
+            const container = document.getElementById('groupsList');
+            container.innerHTML = '';
+
+            // Сначала стандартные группы
+            standardGroups.forEach(groupName => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.textContent = groupName;
+                a.dataset.href = groupName + '.html';
+                a.classList.add('disabled');
+                li.appendChild(a);
+                container.appendChild(li);
+            });
+
+            // Затем кастомные группы
+            customGroups.forEach(groupName => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.textContent = groupName;
+                a.dataset.href = 'group.html?group=' + encodeURIComponent(groupName);
+                a.classList.add('disabled');
+                li.appendChild(a);
+                container.appendChild(li);
+            });
+        }
+
+        // ========== ДОБАВЛЕНИЕ ГРУППЫ ==========
+        function addCustomGroup() {
+            const input = document.getElementById('newGroupName');
+            const name = input.value.trim();
+            if (!name) {
+                alert('Введите название группы');
+                return;
+            }
+            // Проверка на дублирование
+            const allGroups = standardGroups.concat(customGroups);
+            if (allGroups.includes(name)) {
+                alert('Такая группа уже существует');
+                return;
+            }
+            customGroups.push(name);
+            saveCustomGroups();
+            input.value = '';
+            renderGroups();
+            updateUI(); // чтобы новые ссылки активировались
+        }
+
+        // ========== АВТОРИЗАЦИЯ (ОКНО) ==========
+        function handleAuthClick() {
+            if (loggedIn) {
+                logout();
+            } else {
+                openModal();
+            }
+        }
+
+        function openModal() {
+            document.getElementById('loginModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (username === 'admin' && password === '12345') {
+                loggedIn = true;
+                localStorage.setItem('viewerLoggedIn', 'true');
+                updateUI();
+                closeModal();
+            } else {
+                alert('Неверный логин или пароль! Попробуй admin/12345');
+            }
+        }
+
+        function logout() {
+            loggedIn = false;
+            localStorage.removeItem('viewerLoggedIn');
+            updateUI();
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) closeModal();
+        };
+
+        // ========== ИНИЦИАЛИЗАЦИЯ ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCustomGroups();
+            renderGroups();
+            checkAuthState();
+            applyTheme();
+        });
+    </script>
+</body>
+</html>
