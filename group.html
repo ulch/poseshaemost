@@ -2,411 +2,296 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Группа <span id="groupNameDisplay"></span></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Группа</title>
+    <link rel="stylesheet" href="main.css">
     <style>
-        /* === ПЕРЕМЕННЫЕ === */
-        :root {
-            --body-bg: #f0f0f0;
-            --text-color: #191818;
-            --header-bg: #4a5a6a;
-            --card-bg: white;
-            --border-color: #ccc;
-            --cell-bg: white;
-            --edit-bg: #fffde7;
-            --btn-bg: #4a5a6a;
-            --btn-hover: #2c3e50;
-            --danger-bg: #dc3545;
-            --danger-hover: #a71d2a;
+        /* Анимация появления нового столбца (без фона) */
+        th.new-col, td.new-col {
+            animation: fadeInCol 0.4s ease-out;
         }
-
-        body.dark-mode {
-            --body-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --header-bg: #2c3e50;
-            --card-bg: #2d2d2d;
-            --border-color: #555;
-            --cell-bg: #2d2d2d;
-            --edit-bg: #3a3a3a;
-            --btn-bg: #3a4a5a;
-            --btn-hover: #4a5a6a;
+        @keyframes fadeInCol {
+            from { opacity: 0; transform: scaleX(0.8); }
+            to { opacity: 1; transform: scaleX(1); }
         }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: var(--body-bg);
-            color: var(--text-color);
-            padding: 20px;
-            transition: background 0.3s, color 0.3s;
-        }
-
-        .toolbar {
-            margin-bottom: 15px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .toolbar button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            background: var(--btn-bg);
-            color: white;
-            transition: background 0.3s;
-        }
-
-        .toolbar button:hover {
-            background: var(--btn-hover);
-        }
-
-        .toolbar button.clear-marks-btn {
-            background: var(--danger-bg);
-        }
-        .toolbar button.clear-marks-btn:hover {
-            background: var(--danger-hover);
-        }
-
-        .scroll-container {
-            overflow-x: auto;
-        }
-
-        table {
-            border-collapse: collapse;
-            min-width: 100%;
-            background: var(--card-bg);
-        }
-
-        th, td {
-            border: 1px solid var(--border-color);
-            padding: 8px 12px;
-            text-align: center;
-            white-space: nowrap;
-            color: var(--text-color);
-        }
-
-        th {
-            background-color: var(--header-bg);
-            color: white;
-        }
-
-        td:first-child {
-            background: var(--cell-bg);
-            font-weight: bold;
-            text-align: left;
-        }
-
-        td[contenteditable="true"] {
-            background: var(--edit-bg);
-            cursor: text;
-            min-width: 40px;
-        }
-
-        td[contenteditable="true"]:focus {
-            outline: 2px dashed var(--header-bg);
-        }
-
-        .delete-btn {
-            background: var(--danger-bg);
-            color: white;
-            border: none;
-            border-radius: 3px;
-            padding: 2px 8px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-left: 8px;
-        }
-
-        .delete-btn:hover {
-            background: var(--danger-hover);
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 10px;
-            color: var(--text-color);
-            text-decoration: underline;
-        }
-
-        .back-link:hover {
-            opacity: 0.8;
-        }
-
-        .student-count {
-            margin: 5px 0 10px;
-            font-size: 14px;
-            color: var(--text-color);
-            opacity: 0.8;
+        /* Анимация исчезновения столбца */
+        th.fade-out-col, td.fade-out-col {
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-link">← Назад к списку групп</a>
-    <h1>Группа: <span id="groupNameDisplay"></span></h1>
-    <p class="student-count" id="studentCount"></p>
 
-    <div class="toolbar">
-        <button onclick="toggleTheme()" id="themeToggleBtn">🌙 Тёмная тема</button>
-        <button onclick="addStudent()">＋ Добавить студента</button>
-        <button onclick="addDate()">＋ Добавить дату</button>
-        <button onclick="saveData()">💾 Сохранить</button>
-        <button onclick="clearAllMarks()" class="clear-marks-btn">🧹 Очистить все отметки</button>
-    </div>
+<div class="group-page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+    <a href="index.html" class="back-btn" style="background:#6c757d; color:white; border-radius:30px; padding: 10px 26px; font-weight:bold; text-decoration:none; transition: 0.2s;">← Назад</a>
+    <h1 class="group-title" id="groupTitle" style="margin:0; text-decoration:underline; color: var(--btn-bg); font-weight:bold; font-style:italic;"></h1>
+    <button id="themeToggleGroup" class="theme-toggle-btn" style="padding: 8px 18px;">🌙</button>
+</div>
 
-    <div class="scroll-container">
-        <table id="attendanceTable">
-            <thead></thead>
-            <tbody></tbody>
-        </table>
-    </div>
+<div class="stats-toolbar">
+    <span class="student-count" id="studentCount">Всего студентов: 0</span>
+    <input type="text" class="search-box" id="searchInput" placeholder="🔍 Поиск по № или ФИО...">
+    <button class="export-btn" id="exportBtn">📊 Экспорт в Excel</button>
+</div>
 
-    <script>
-        // === АВТОРИЗАЦИЯ ===
-        if (localStorage.getItem('viewerLoggedIn') !== 'true') {
-            window.location.href = 'index.html';
-        }
+<div class="scroll-container">
+    <table id="attendanceTable">
+        <thead></thead>
+        <tbody></tbody>
+    </table>
+</div>
 
-        // === ПОЛУЧЕНИЕ ИМЕНИ ГРУППЫ ИЗ URL ===
-        const urlParams = new URLSearchParams(window.location.search);
-        let groupName = urlParams.get('group');
-        if (!groupName) {
-            alert('Не указана группа');
-            window.location.href = 'index.html';
-        }
-        // Декодируем, чтобы поддерживать русские названия
-        groupName = decodeURIComponent(groupName);
-        document.getElementById('groupNameDisplay').textContent = groupName;
-        document.title = 'Группа ' + groupName;
+<button class="clear-marks-btn" id="clearMarksBtn">🧹 Очистить все отметки</button>
 
-        const STORAGE_KEY = 'groupData_' + groupName;
-        // Начальные данные пусты
-        const defaultStudents = [];
-        const defaultDates = [];
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const subject = urlParams.get('subject');
+const group = urlParams.get('group');
+if (!subject || !group) {
+    alert('Не указаны предмет и группа');
+    window.location.href = 'index.html';
+}
+document.getElementById('groupTitle').textContent = `${subject} — ${group}`;
+const STORAGE_KEY = `groupData_${subject}_${group}`;
 
-        // === ТЕМА ===
-        function applyTheme() {
-            const theme = localStorage.getItem('theme') || 'light';
-            const btn = document.getElementById('themeToggleBtn');
-            if (theme === 'dark') {
-                document.body.classList.add('dark-mode');
-                btn.textContent = '☀️ Светлая тема';
-            } else {
-                document.body.classList.remove('dark-mode');
-                btn.textContent = '🌙 Тёмная тема';
+function applyTheme() {
+    const theme = localStorage.getItem('theme') || 'light';
+    const btn = document.getElementById('themeToggleGroup');
+    if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        btn.textContent = '☀️';
+    } else {
+        document.body.classList.remove('dark-mode');
+        btn.textContent = '🌙';
+    }
+}
+document.getElementById('themeToggleGroup').onclick = () => {
+    localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'light' : 'dark');
+    applyTheme();
+};
+
+function loadData() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+        try {
+            const parsed = JSON.parse(stored);
+            if (parsed && Array.isArray(parsed.students) && Array.isArray(parsed.dates) && typeof parsed.attendance === 'object') {
+                return parsed;
             }
-        }
+        } catch(e) {}
+    }
+    return { students: [], dates: [], attendance: {} };
+}
+let data = loadData();
 
-        function toggleTheme() {
-            if (document.body.classList.contains('dark-mode')) {
-                document.body.classList.remove('dark-mode');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('theme', 'dark');
-            }
-            applyTheme();
-        }
+function autoSave() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
 
-        // === ДАННЫЕ ===
-        function loadData() {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                try {
-                    const parsed = JSON.parse(stored);
-                    if (parsed && Array.isArray(parsed.students) && Array.isArray(parsed.dates) && typeof parsed.attendance === 'object') {
-                        return parsed;
-                    }
-                } catch (e) {
-                    console.warn('Ошибка загрузки');
-                }
-            }
-            return {
-                students: defaultStudents.slice(),
-                dates: defaultDates.slice(),
-                attendance: {}
-            };
-        }
+const nonAttendance = new Set(['-', '0', 'н', 'б/у', 'бу', 'б/y', 'y']);
+function isAttendanceMark(val) {
+    return val.trim() !== '' && !nonAttendance.has(val.trim().toLowerCase());
+}
 
-        let data = loadData();
+function getAttendanceCount(si) {
+    let cnt = 0;
+    data.dates.forEach((_, di) => {
+        if (isAttendanceMark(data.attendance[`${si},${di}`] || '')) cnt++;
+    });
+    return cnt;
+}
 
-        function saveData() {
-            const studentRows = document.querySelectorAll('#attendanceTable tbody tr');
-            studentRows.forEach((row, index) => {
-                const nameSpan = row.querySelector('td:first-child span');
-                if (nameSpan) {
-                    data.students[index] = nameSpan.textContent.trim();
-                }
-            });
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const query = e.target.value.trim().toLowerCase();
+    document.querySelectorAll('#attendanceTable tbody tr:not(.add-row)').forEach(row => {
+        const num = row.querySelector('.row-number')?.textContent || '';
+        const name = row.querySelector('.student-name')?.textContent.toLowerCase() || '';
+        row.classList.toggle('hidden-row', query !== '' && !num.includes(query) && !name.includes(query));
+    });
+});
 
-            data.students.forEach((student, studentIndex) => {
-                data.dates.forEach((date, dateIndex) => {
-                    const row = studentRows[studentIndex];
-                    if (!row) return;
-                    const cell = row.cells[dateIndex + 2]; // +2: ФИО, Посещено
-                    if (cell) {
-                        const key = `${studentIndex},${dateIndex}`;
-                        data.attendance[key] = cell.textContent.trim();
-                    }
-                });
-            });
+// ---------- УДАЛЕНИЕ ДАТЫ с анимацией ----------
+function animateAndRemoveDate(dateIndex) {
+    const cols = document.querySelectorAll(
+        `#attendanceTable thead th:nth-child(${dateIndex + 4}),
+         #attendanceTable tbody tr td:nth-child(${dateIndex + 4})`
+    );
+    cols.forEach(cell => cell.classList.add('fade-out-col'));
 
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-            alert('Данные сохранены!');
-        }
-
-        function getAttendanceCount(studentIndex) {
-            let count = 0;
-            data.dates.forEach((_, dateIndex) => {
-                const key = `${studentIndex},${dateIndex}`;
-                if (data.attendance[key] && data.attendance[key].trim() !== '') {
-                    count++;
-                }
-            });
-            return count;
-        }
-
-        function renderTable() {
-            const table = document.getElementById('attendanceTable');
-            const thead = table.querySelector('thead');
-            const tbody = table.querySelector('tbody');
-
-            thead.innerHTML = '';
-            tbody.innerHTML = '';
-
-            const headerRow = document.createElement('tr');
-            const thFio = document.createElement('th');
-            thFio.textContent = 'ФИО';
-            headerRow.appendChild(thFio);
-
-            const thAttend = document.createElement('th');
-            thAttend.textContent = 'Посещено';
-            headerRow.appendChild(thAttend);
-
-            data.dates.forEach((date, dateIndex) => {
-                const thDate = document.createElement('th');
-                thDate.textContent = date;
-                const delBtn = document.createElement('button');
-                delBtn.className = 'delete-btn';
-                delBtn.textContent = '✕';
-                delBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (confirm(`Удалить дату "${date}" и все отметки?`)) {
-                        removeDate(dateIndex);
-                        renderTable();
-                    }
-                });
-                thDate.appendChild(delBtn);
-                headerRow.appendChild(thDate);
-            });
-            thead.appendChild(headerRow);
-
-            data.students.forEach((student, studentIndex) => {
-                const tr = document.createElement('tr');
-
-                const tdFio = document.createElement('td');
-                const nameSpan = document.createElement('span');
-                nameSpan.textContent = student;
-                nameSpan.setAttribute('contenteditable', 'true');
-                nameSpan.addEventListener('input', () => {
-                    data.students[studentIndex] = nameSpan.textContent.trim();
-                });
-                tdFio.appendChild(nameSpan);
-
-                const delStudentBtn = document.createElement('button');
-                delStudentBtn.className = 'delete-btn';
-                delStudentBtn.textContent = '✕';
-                delStudentBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    if (data.students.length <= 1) {
-                        alert('Нельзя удалить последнего студента!');
-                        return;
-                    }
-                    if (confirm(`Удалить студента "${data.students[studentIndex]}"?`)) {
-                        removeStudent(studentIndex);
-                        renderTable();
-                    }
-                });
-                tdFio.appendChild(delStudentBtn);
-                tr.appendChild(tdFio);
-
-                const tdAttend = document.createElement('td');
-                tdAttend.textContent = getAttendanceCount(studentIndex);
-                tr.appendChild(tdAttend);
-
-                data.dates.forEach((date, dateIndex) => {
-                    const td = document.createElement('td');
-                    const key = `${studentIndex},${dateIndex}`;
-                    td.textContent = data.attendance[key] || '';
-                    td.setAttribute('contenteditable', 'true');
-                    td.addEventListener('input', () => {
-                        let val = td.textContent.trim();
-                        if (val.length > 1) val = val.charAt(0);
-                        data.attendance[key] = val;
-                        tdAttend.textContent = getAttendanceCount(studentIndex);
-                    });
-                    tr.appendChild(td);
-                });
-
-                tbody.appendChild(tr);
-            });
-
-            document.getElementById('studentCount').textContent = `Всего студентов: ${data.students.length}`;
-        }
-
-        function addStudent() {
-            const newName = prompt('Введите ФИО студента:');
-            if (newName && newName.trim()) {
-                data.students.push(newName.trim());
-                renderTable();
-            }
-        }
-
-        function addDate() {
-            const newDate = prompt('Введите дату (например, 25.04.2026):');
-            if (newDate && newDate.trim()) {
-                data.dates.push(newDate.trim());
-                renderTable();
-            }
-        }
-
-        function removeStudent(studentIndex) {
-            if (data.students.length <= 1) {
-                alert('Нельзя удалить последнего студента!');
-                return;
-            }
-            data.students.splice(studentIndex, 1);
-            const newAttendance = {};
-            Object.keys(data.attendance).forEach(key => {
-                const [sIdx, dIdx] = key.split(',').map(Number);
-                if (sIdx === studentIndex) return;
-                const newSIdx = sIdx > studentIndex ? sIdx - 1 : sIdx;
-                newAttendance[`${newSIdx},${dIdx}`] = data.attendance[key];
-            });
-            data.attendance = newAttendance;
-        }
-
-        function removeDate(dateIndex) {
-            data.dates.splice(dateIndex, 1);
-            const newAttendance = {};
-            Object.keys(data.attendance).forEach(key => {
-                const [sIdx, dIdx] = key.split(',').map(Number);
-                if (dIdx === dateIndex) return;
-                const newDIdx = dIdx > dateIndex ? dIdx - 1 : dIdx;
-                newAttendance[`${sIdx},${newDIdx}`] = data.attendance[key];
-            });
-            data.attendance = newAttendance;
-        }
-
-        function clearAllMarks() {
-            if (confirm('Удалить ВСЕ отметки о посещаемости? Студенты и даты останутся.')) {
-                data.attendance = {};
-                saveData();
-                renderTable();
-            }
-        }
-
-        applyTheme();
+    setTimeout(() => {
+        removeDate(dateIndex);
         renderTable();
-    </script>
+        autoSave();
+    }, 300);
+}
+
+// ---------- ОТРИСОВКА ТАБЛИЦЫ ----------
+function renderTable(highlightNew = false, newDateIndex = -1) {
+    const table = document.getElementById('attendanceTable');
+    const thead = table.querySelector('thead');
+    const tbody = table.querySelector('tbody');
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    // Заголовок
+    const hr = document.createElement('tr');
+    ['№', 'ФИО', 'Посещено'].forEach(t => { const th = document.createElement('th'); th.textContent = t; hr.appendChild(th); });
+    data.dates.forEach((date, di) => {
+        const th = document.createElement('th');
+        th.innerHTML = `${date} <button class="delete-btn">✕</button>`;
+        th.querySelector('.delete-btn').onclick = (e) => {
+            e.stopPropagation();
+            if (confirm(`Удалить дату "${date}"?`)) {
+                animateAndRemoveDate(di);
+            }
+        };
+        if (di === newDateIndex) {
+            th.classList.add('new-col');
+            setTimeout(() => th.classList.remove('new-col'), 400);
+        }
+        hr.appendChild(th);
+    });
+    const thAdd = document.createElement('th');
+    thAdd.className = 'add-cell';
+    thAdd.textContent = '+';
+    thAdd.onclick = () => {
+        const d = prompt('Дата (дд.мм.гггг):');
+        if (d && d.trim()) {
+            data.dates.push(d.trim());
+            renderTable(false, data.dates.length - 1);
+            autoSave();
+        }
+    };
+    hr.appendChild(thAdd);
+    thead.appendChild(hr);
+
+    // Строки студентов
+    data.students.forEach((student, si) => {
+        const tr = document.createElement('tr');
+        if (highlightNew && si === data.students.length - 1) tr.classList.add('new-row');
+
+        const tdNum = document.createElement('td');
+        tdNum.className = 'row-number';
+        tdNum.textContent = si + 1;
+        tr.appendChild(tdNum);
+
+        const tdFio = document.createElement('td');
+        const span = document.createElement('span');
+        span.className = 'student-name';
+        span.textContent = student;
+        span.contentEditable = 'true';
+        span.oninput = () => { data.students[si] = span.textContent.trim(); autoSave(); };
+        tdFio.appendChild(span);
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delete-btn';
+        delBtn.textContent = '✕';
+        delBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (data.students.length <= 1) return alert('Нельзя удалить последнего студента');
+            if (confirm(`Удалить ${student}?`)) {
+                tr.classList.add('fade-out');
+                setTimeout(() => {
+                    removeStudent(si);
+                    renderTable();
+                    autoSave();
+                }, 300);
+            }
+        };
+        tdFio.appendChild(delBtn);
+        tr.appendChild(tdFio);
+
+        const tdAtt = document.createElement('td');
+        tdAtt.textContent = getAttendanceCount(si);
+        tr.appendChild(tdAtt);
+
+        data.dates.forEach((_, di) => {
+            const td = document.createElement('td');
+            const key = `${si},${di}`;
+            td.textContent = data.attendance[key] || '';
+            td.contentEditable = 'true';
+            td.oninput = () => {
+                let val = td.textContent.trim();
+                if (val.length > 3) val = val.slice(0,3);
+                data.attendance[key] = val;
+                tdAtt.textContent = getAttendanceCount(si);
+                autoSave();
+            };
+            if (di === newDateIndex) {
+                td.classList.add('new-col');
+                setTimeout(() => td.classList.remove('new-col'), 400);
+            }
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+
+    // Строка добавления студента
+    const addRow = document.createElement('tr');
+    addRow.className = 'add-row';
+    const tdAdd = document.createElement('td');
+    tdAdd.className = 'add-cell';
+    tdAdd.textContent = '+';
+    tdAdd.colSpan = 4 + data.dates.length;
+    tdAdd.onclick = () => {
+        const name = prompt('ФИО студента:');
+        if (name && name.trim()) {
+            data.students.push(name.trim());
+            renderTable(true);
+            autoSave();
+        }
+    };
+    addRow.appendChild(tdAdd);
+    tbody.appendChild(addRow);
+
+    document.getElementById('studentCount').textContent = `Всего студентов: ${data.students.length}`;
+}
+
+function removeStudent(si) {
+    data.students.splice(si, 1);
+    const newAtt = {};
+    Object.keys(data.attendance).forEach(key => {
+        const [s, d] = key.split(',').map(Number);
+        if (s === si) return;
+        newAtt[`${s > si ? s-1 : s},${d}`] = data.attendance[key];
+    });
+    data.attendance = newAtt;
+}
+
+function removeDate(di) {
+    data.dates.splice(di, 1);
+    const newAtt = {};
+    Object.keys(data.attendance).forEach(key => {
+        const [s, d] = key.split(',').map(Number);
+        if (d === di) return;
+        newAtt[`${s},${d > di ? d-1 : d}`] = data.attendance[key];
+    });
+    data.attendance = newAtt;
+}
+
+document.getElementById('clearMarksBtn').onclick = () => {
+    if (confirm('Удалить все отметки?')) {
+        data.attendance = {};
+        autoSave();
+        renderTable();
+    }
+};
+
+document.getElementById('exportBtn').onclick = () => {
+    let csv = '№;ФИО;' + data.dates.join(';') + '\n';
+    data.students.forEach((s, i) => {
+        csv += `${i+1};${s}`;
+        data.dates.forEach((_, d) => csv += ';' + (data.attendance[`${i},${d}`] || ''));
+        csv += '\n';
+    });
+    const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${subject}_${group}.csv`;
+    a.click();
+};
+
+applyTheme();
+renderTable();
+</script>
 </body>
 </html>

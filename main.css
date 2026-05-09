@@ -1,64 +1,78 @@
-/* === ПЕРЕМЕННЫЕ ЦВЕТОВ === */
+/* ========== ПЕРЕМЕННЫЕ ========== */
 :root {
-    --body-bg: #f0f0f0;
+    --body-bg: #f0f0f0; /* fallback */
+    --body-gradient: linear-gradient(135deg, #ffffff 0%, #eaeef2 30%, #b0c4de 70%, #2c3e50 100%);
     --text-color: #191818;
     --header-bg: #4a5a6a;
-    --card-bg: white;
-    --card-text: #191818;
+    --card-bg: rgba(255,255,255,0.92);
+    --card-shadow: 0 8px 24px rgba(0,0,0,0.08);
     --card-border: #4a5a6a;
     --link-color: #0056b3;
-    --link-hover: #003d82;
+    --link-hover: #004080;
     --disabled-link: #999;
-    --btn-login-bg: #28a745;
-    --btn-login-hover: #218838;
-    --btn-logout-bg: #dc3545;
-    --btn-logout-hover: #c82333;
+    --btn-bg: #4a5a6a;
+    --btn-hover: #2c3e50;
+    --btn-text: white;
+    --logout-btn-bg: #6c757d;
+    --logout-btn-hover: #5a6268;
     --modal-bg: white;
     --input-border: #ddd;
-    --panel-bg: white;
+    --add-btn-hover: #e9ecef;
+    --row-hover: #f1f3f5;
+    --fade-bg: rgba(255,255,255,0.1);
 }
 
 body.dark-mode {
-    --body-bg: #1e1e1e;
+    --body-gradient: linear-gradient(135deg, #1e1e1e 0%, #2a2a2e 30%, #1b3b4f 70%, #0a1c2e 100%);
     --text-color: #e0e0e0;
-    --header-bg: #2c3e50;
-    --card-bg: #2d2d2d;
-    --card-text: #e0e0e0;
+    --header-bg: #4a5a6a;
+    --card-bg: rgba(45,45,45,0.92);
+    --card-shadow: 0 8px 24px rgba(0,0,0,0.4);
     --card-border: #e0e0e0;
     --link-color: #8ab4f8;
     --link-hover: #aecbfa;
     --disabled-link: #666;
-    --btn-login-bg: #28a745;
-    --btn-login-hover: #218838;
-    --btn-logout-bg: #dc3545;
-    --btn-logout-hover: #c82333;
+    --btn-bg: #3a4a5a;
+    --btn-hover: #4a5a6a;
+    --btn-text: white;
+    --logout-btn-bg: #4a5a6a;
+    --logout-btn-hover: #2c3e50;
     --modal-bg: #2d2d2d;
     --input-border: #555;
-    --panel-bg: #2d2d2d;
+    --add-btn-hover: #3a3a3a;
+    --row-hover: #3a3f47;
+    --fade-bg: rgba(255,255,255,0.05);
 }
 
+/* ========== ОСНОВА ========== */
 body {
-    background-color: var(--body-bg);
+    background: var(--body-gradient);
+    background-attachment: fixed;
     color: var(--text-color);
-    font-family: Arial, sans-serif;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', sans-serif;
     padding: 20px;
-    transition: background-color 0.3s, color 0.3s;
+    transition: background 0.3s, color 0.3s;
 }
 
-/* Шапка */
+/* ========== ШАПКА С ГРАДИЕНТОМ ========== */
 .group-header {
-    background-color: var(--header-bg);
+    background: linear-gradient(to right, rgba(74,90,106,0.85), rgba(74,90,106,0.95), rgba(74,90,106,0.85));
     color: white;
     padding: 30px;
-    border-radius: 10px;
+    border-radius: 20px;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
 }
 
 .group-header h1 {
     font-size: 36px;
     margin-bottom: 10px;
+    font-weight: bold;
+    font-style: italic;
     color: white;
+    letter-spacing: 1px;
 }
 
 .org-name {
@@ -66,118 +80,21 @@ body {
     color: #ffffff;
     margin-bottom: 5px;
     font-weight: normal;
+    font-style: normal;
+    opacity: 0.9;
 }
 
-/* Карточка списка групп */
-.disciplines-card {
-    background-color: var(--card-bg);
-    border-radius: 10px;
-    padding: 25px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    margin-bottom: 30px;
-}
-
-.disciplines-card h2 {
-    color: var(--card-text);
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--card-border);
-}
-
-/* Список групп */
-.groups-list {
-    list-style: none;
-    padding-left: 0;
-}
-
-.groups-list li {
-    margin-bottom: 12px;
-}
-
-.groups-list li a {
-    text-decoration: none;
-    font-size: 18px;
-    color: var(--link-color);
-    transition: color 0.2s;
-    cursor: pointer;
-}
-
-.groups-list li a:hover {
-    color: var(--link-hover);
-    text-decoration: underline;
-}
-
-.groups-list li a.disabled {
-    color: var(--disabled-link);
-    cursor: not-allowed;
-    pointer-events: none;
-    text-decoration: none;
-}
-
-/* Контейнер для кнопок (тема + вход) */
-.auth-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-/* Кнопка переключения темы */
-.theme-toggle-btn {
-    background: none;
-    border: 1px solid var(--text-color);
-    color: var(--text-color);
-    padding: 8px 16px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 14px;
-}
-
-.theme-toggle-btn:hover {
-    background: var(--text-color);
-    color: var(--body-bg);
-}
-
-/* Кнопка входа / выхода */
-.login-btn {
-    background-color: var(--btn-login-bg);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.login-btn:hover {
-    background-color: var(--btn-login-hover);
-}
-
-.logout-btn {
-    background-color: var(--btn-logout-bg);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.logout-btn:hover {
-    background-color: var(--btn-logout-hover);
-}
-
-/* Панель добавления группы */
+/* ========== ПЛАШКА ДОБАВЛЕНИЯ ГРУППЫ ========== */
 .add-group-panel {
     display: none;
-    background-color: var(--panel-bg);
-    padding: 15px;
-    border-radius: 8px;
+    background-color: var(--card-bg);
+    padding: 15px 20px;
+    border-radius: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: var(--card-shadow);
     align-items: center;
     gap: 10px;
+    backdrop-filter: blur(5px);
 }
 
 .add-group-panel.visible {
@@ -186,82 +103,314 @@ body {
 }
 
 .add-group-panel input {
-    padding: 8px 12px;
+    padding: 8px 16px;
     border: 1px solid var(--input-border);
-    border-radius: 4px;
+    border-radius: 20px;
     background-color: var(--card-bg);
     color: var(--text-color);
     flex: 1 1 200px;
+    font-family: inherit;
 }
 
 .add-group-panel button {
-    padding: 8px 16px;
-    background-color: var(--btn-login-bg);
-    color: white;
+    padding: 8px 24px;
+    background-color: var(--btn-bg);
+    color: var(--btn-text);
     border: none;
-    border-radius: 4px;
+    border-radius: 20px;
     cursor: pointer;
+    font-weight: bold;
+    font-style: italic;
+    transition: all 0.2s;
 }
-
 .add-group-panel button:hover {
-    background-color: var(--btn-login-hover);
+    background-color: var(--btn-hover);
 }
 
-/* Модальное окно */
+/* ========== КАРТОЧКА СПИСКА ========== */
+.disciplines-card {
+    background-color: var(--card-bg);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 30px;
+    backdrop-filter: blur(5px);
+}
+
+.disciplines-card h2 {
+    color: var(--text-color);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--card-border);
+    font-weight: bold;
+    font-style: italic;
+}
+
+/* ========== СПИСОК ГРУПП ========== */
+.groups-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.groups-list li {
+    margin-bottom: 8px;
+}
+
+.groups-list li a {
+    text-decoration: none;
+    font-size: 18px;
+    color: var(--link-color);
+    transition: all 0.2s;
+    cursor: pointer;
+    padding: 8px 20px;
+    display: inline-block;
+    border-radius: 20px;
+    font-weight: bold;
+    font-style: italic;
+    background: transparent;
+}
+
+.groups-list li a:hover {
+    background-color: var(--link-hover);
+    color: white;
+    transform: translateX(5px);
+}
+
+.groups-list li a.disabled {
+    color: var(--disabled-link);
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+/* ========== КНОПКИ ОБЩИЕ ========== */
+.login-btn, .logout-btn, .theme-toggle-btn, .subject-btn, .backup-btn {
+    padding: 10px 28px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-style: italic;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.login-btn {
+    background-color: var(--btn-bg);
+    color: var(--btn-text);
+}
+.login-btn:hover { background-color: var(--btn-hover); }
+
+.logout-btn {
+    background-color: var(--logout-btn-bg);
+    color: white;
+}
+.logout-btn:hover { background-color: var(--logout-btn-hover); }
+
+.theme-toggle-btn {
+    background: none;
+    border: 2px solid var(--text-color);
+    color: var(--text-color);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.theme-toggle-btn:hover {
+    background: var(--text-color);
+    color: #ffffff;
+}
+
+.subject-btn {
+    background-color: var(--btn-bg);
+    color: white;
+    margin: 5px;
+}
+.subject-btn:hover { background-color: var(--btn-hover); }
+
+/* ========== МОДАЛЬНОЕ ОКНО ========== */
 .modal {
     display: none;
     position: fixed;
     z-index: 10;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
     background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
 }
 
 .modal-content {
     background-color: var(--modal-bg);
     margin: 10% auto;
-    padding: 25px;
-    width: 300px;
-    border-radius: 8px;
+    padding: 30px;
+    width: 340px;
+    border-radius: 25px;
     position: relative;
     color: var(--text-color);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.2);
 }
 
 .close {
     position: absolute;
-    right: 15px;
-    top: 10px;
+    right: 20px;
+    top: 15px;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
     color: var(--text-color);
+    transition: transform 0.2s;
 }
+.close:hover { transform: scale(1.2); }
 
 .modal-content input {
     display: block;
     width: 90%;
     margin: 10px auto;
-    padding: 8px;
+    padding: 10px 15px;
     border: 1px solid var(--input-border);
-    border-radius: 5px;
+    border-radius: 20px;
     background-color: var(--card-bg);
     color: var(--text-color);
+    font-family: inherit;
 }
 
 .modal-content button {
     display: block;
     width: 95%;
     margin: 15px auto;
-    padding: 8px;
-    background-color: var(--btn-login-bg);
+    padding: 10px;
+    background-color: var(--btn-bg);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 20px;
     cursor: pointer;
+    font-weight: bold;
+    font-style: italic;
+    font-family: inherit;
+    transition: background 0.2s;
 }
+.modal-content button:hover { background-color: var(--btn-hover); }
 
-.modal-content button:hover {
-    background-color: var(--btn-login-hover);
+/* ========== ТАБЛИЦА ========== */
+.scroll-container {
+    overflow-x: auto;
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card-bg);
+    color: var(--text-color);
+    white-space: nowrap;
+}
+th, td {
+    padding: 10px 14px;
+    text-align: center;
+    border-bottom: 1px solid rgba(128,128,128,0.2);
+}
+th {
+    background-color: var(--header-bg);
+    color: white;
+    font-weight: bold;
+    font-style: italic;
+    position: sticky;
+    top: 0;
+}
+tr:hover td {
+    background-color: var(--row-hover);
+}
+td[contenteditable="true"] {
+    background: #fffde7;
+    border-radius: 6px;
+}
+body.dark-mode td[contenteditable="true"] {
+    background: #3a3a3a;
+}
+.add-cell {
+    cursor: pointer;
+    color: var(--btn-bg);
+    font-weight: bold;
+    font-size: 20px;
+    background: var(--card-bg);
+    border: 1px dashed var(--card-border);
+}
+.add-cell:hover { background: var(--add-btn-hover); }
+.delete-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-left: 6px;
+    line-height: 1;
+    transition: transform 0.2s;
+}
+.delete-btn:hover { transform: scale(1.15); }
+
+/* ========== АНИМАЦИИ ========== */
+@keyframes fadeInRow {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+tr.new-row {
+    animation: fadeInRow 0.3s ease-out;
+}
+@keyframes fadeOutRow {
+    from { opacity: 1; transform: scaleY(1); }
+    to { opacity: 0; transform: scaleY(0.7); }
+}
+tr.fade-out {
+    animation: fadeOutRow 0.3s ease-in forwards;
+}
+tr.hidden-row { display: none; }
+
+/* ========== ВСПОМОГАТЕЛЬНЫЕ ЭЛЕМЕНТЫ ========== */
+.stats-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.student-count {
+    font-weight: bold;
+    font-style: italic;
+    color: var(--text-color);
+    background: var(--card-bg);
+    padding: 6px 16px;
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+}
+.export-btn, .clear-marks-btn {
+    background-color: var(--btn-bg);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 8px 22px;
+    cursor: pointer;
+    font-weight: bold;
+    font-style: italic;
+    transition: all 0.2s;
+}
+.export-btn:hover, .clear-marks-btn:hover {
+    background-color: var(--btn-hover);
+}
+.clear-marks-btn {
+    display: block;
+    margin-left: auto;
+    margin-top: 15px;
+    opacity: 0.8;
+}
+.clear-marks-btn:hover { opacity: 1; }
+
+.search-box {
+    padding: 8px 16px;
+    border-radius: 30px;
+    border: 1px solid var(--input-border);
+    background: var(--card-bg);
+    color: var(--text-color);
+    font-family: inherit;
+    width: 220px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
