@@ -22,7 +22,7 @@
     <button id="addGroupBtn">＋ Добавить группу</button>
 </div>
 
-<!-- Кнопка возврата к предметам (видна только при нескольких предметах и выбранном предмете) -->
+<!-- Кнопка возврата к предметам -->
 <div style="text-align: left; margin-bottom: 15px;">
     <button id="backToSubjectsBtn" class="login-btn" style="display: none;">← Назад к предметам</button>
 </div>
@@ -30,6 +30,12 @@
 <div class="disciplines-card">
     <h2 id="listTitle">📋 Списки групп</h2>
     <div id="subjectButtons" class="subject-selector" style="text-align: center; margin-bottom: 15px;"></div>
+
+    <!-- Поле поиска групп (показывается только при выбранном предмете) -->
+    <div id="groupSearchContainer" style="margin-bottom: 15px; display: none;">
+        <input type="text" id="groupSearchInput" class="search-box" placeholder="🔍 Поиск группы..." style="width: 100%; max-width: 300px;">
+    </div>
+
     <ul class="groups-list" id="groupsList"></ul>
 </div>
 
@@ -57,6 +63,7 @@ const users = [
 let currentUser = null;
 let currentSubject = null;
 let customGroups = {};
+let hiddenGroups = {};   // скрытые (удалённые) группы для каждого предмета
 
 // ========== ТЕМА ==========
 function applyTheme() {
@@ -101,36 +108,45 @@ function updateUI() {
     const listUl = document.getElementById('groupsList');
     const title = document.getElementById('listTitle');
     const backBtn = document.getElementById('backToSubjectsBtn');
+    const searchContainer = document.getElementById('groupSearchContainer');
 
     if (currentUser) {
         authBtn.textContent = 'Выйти';
         authBtn.className = 'logout-btn';
-        if (currentUser.subjects.length === 1) {
-            selectSubject(currentUser.subjects[0]);
+
+        // Если один предмет – сразу выбираем его, без повторного вызова updateUI
+        if (currentUser.subjects.length === 1 && !currentSubject) {
+            currentSubject = currentUser.subjects[0];
+        }
+
+        if (currentSubject) {
+            // Показываем список групп для выбранного предмета
+            title.textContent = `📋 Группы — ${currentSubject}`;
+            subjDiv.innerHTML = '';
             panel.classList.add('visible');
-            backBtn.style.display = 'none';
+            searchContainer.style.display = 'block';
+            backBtn.style.display = (currentUser.subjects.length > 1) ? 'inline-block' : 'none';
+            loadCustomGroups();
+            loadHiddenGroups();
+            renderGroupList();
         } else {
-            if (currentSubject) {
-                title.textContent = `📋 Группы — ${currentSubject}`;
-                subjDiv.innerHTML = '';
-                panel.classList.add('visible');
-                backBtn.style.display = 'inline-block';
-                loadCustomGroups();
-                renderGroupList();
-            } else {
-                title.textContent = '📚 Выберите предмет';
-                subjDiv.innerHTML = '';
-                currentUser.subjects.forEach(sub => {
-                    const btn = document.createElement('button');
-                    btn.className = 'subject-btn';
-                    btn.textContent = sub;
-                    btn.onclick = () => selectSubject(sub);
-                    subjDiv.appendChild(btn);
-                });
-                listUl.innerHTML = '';
-                panel.classList.remove('visible');
-                backBtn.style.display = 'none';
-            }
+            // Несколько предметов и ни один не выбран – показываем кнопки предметов
+            title.textContent = '📚 Выберите предмет';
+            subjDiv.innerHTML = '';
+            currentUser.subjects.forEach(sub => {
+                const btn = document.createElement('button');
+                btn.className = 'subject-btn';
+                btn.textContent = sub;
+                btn.onclick = () => {
+                    currentSubject = sub;
+                    updateUI();
+                };
+                subjDiv.appendChild(btn);
+            });
+            listUl.innerHTML = '';
+            panel.classList.remove('visible');
+            backBtn.style.display = 'none';
+            searchContainer.style.display = 'none';
         }
     } else {
         authBtn.textContent = 'Войти для просмотра';
@@ -141,15 +157,11 @@ function updateUI() {
         listUl.innerHTML = '';
         panel.classList.remove('visible');
         backBtn.style.display = 'none';
+        searchContainer.style.display = 'none';
     }
 }
 
-function selectSubject(subject) {
-    currentSubject = subject;
-    updateUI();
-}
-
-// ========== ГРУППЫ ==========
+// ========== ЗАГРУЗКА ДАННЫХ ГРУПП ==========
 function getDefaultGroups(subject) {
     const map = {
         'Биология': ['КИО-25-9', 'КЭО-25-9'],
@@ -172,32 +184,115 @@ function saveCustomGroups() {
     localStorage.setItem('customGroups_' + currentSubject, JSON.stringify(customGroups[currentSubject]));
 }
 
+function loadHiddenGroups() {
+    if (!currentSubject) return;
+    const key = 'hiddenGroups_' + currentSubject;
+    const stored = localStorage.getItem(key);
+    hiddenGroups[currentSubject] = stored ? JSON.parse(stored) : [];
+}
+
+function saveHiddenGroups() {
+    if (!currentSubject) return;
+    localStorage.setItem('hiddenGroups_' + currentSubject, JSON.stringify(hiddenGroups[currentSubject]));
+}
+
+// ========== ПОИСК ГРУПП ==========
+document.getElementById('groupSearchInput').addEventListener('input', function(e) {
+    const query = e.target.value.trim().toLowerCase();
+    document.querySelectorAll('#groupsList li').forEach(li => {
+        const text = li.querySelector('.group-name')?.textContent.toLowerCase() || '';
+        li.style.display = (query === '' || text.includes(query)) ? '' : 'none';
+    });
+});
+
+// ========== ОТРИСОВКА СПИСКА ГРУПП ==========
 function renderGroupList() {
     const ul = document.getElementById('groupsList');
     ul.innerHTML = '';
     if (!currentSubject) return;
+
     const def = getDefaultGroups(currentSubject);
     const cust = customGroups[currentSubject] || [];
-    const all = [...new Set([...def, ...cust])];
+    const hidden = hiddenGroups[currentSubject] || [];
+    const all = [...new Set([...def, ...cust])].filter(g => !hidden.includes(g));
+
     all.forEach(group => {
         const li = document.createElement('li');
+        li.style.display = 'flex';
+        li.style.alignItems = 'center';
+        li.style.marginBottom = '8px';
+
         const a = document.createElement('a');
+        a.className = 'group-name';
         a.textContent = group;
         a.href = `group.html?subject=${encodeURIComponent(currentSubject)}&group=${encodeURIComponent(group)}`;
         if (!currentUser) a.classList.add('disabled');
+        a.style.flex = '1';
         li.appendChild(a);
+
+        // Кнопка удаления группы (серый крестик)
+        if (currentUser) {
+            const delBtn = document.createElement('button');
+            delBtn.className = 'delete-btn';
+            delBtn.textContent = '✕';
+            delBtn.style.marginLeft = '10px';
+            delBtn.style.background = '#6c757d';   // серый цвет
+            delBtn.style.color = 'white';
+            delBtn.style.border = 'none';
+            delBtn.style.borderRadius = '50%';
+            delBtn.style.width = '22px';
+            delBtn.style.height = '22px';
+            delBtn.style.fontSize = '14px';
+            delBtn.style.cursor = 'pointer';
+            delBtn.style.lineHeight = '1';
+            delBtn.onclick = (e) => {
+                e.stopPropagation();
+                if (confirm(`Удалить группу "${group}"? Группа будет скрыта из списка.`)) {
+                    hideGroup(group);
+                    renderGroupList();
+                }
+            };
+            li.appendChild(delBtn);
+        }
+
         ul.appendChild(li);
     });
+
+    // Обновить фильтр поиска
+    document.getElementById('groupSearchInput').dispatchEvent(new Event('input'));
+}
+
+// ========== УДАЛЕНИЕ (СКРЫТИЕ) ГРУППЫ ==========
+function hideGroup(name) {
+    if (!hiddenGroups[currentSubject]) hiddenGroups[currentSubject] = [];
+    if (!hiddenGroups[currentSubject].includes(name)) {
+        hiddenGroups[currentSubject].push(name);
+    }
+    if (customGroups[currentSubject]) {
+        customGroups[currentSubject] = customGroups[currentSubject].filter(g => g !== name);
+        saveCustomGroups();
+    }
+    saveHiddenGroups();
 }
 
 // ========== ДОБАВЛЕНИЕ ГРУППЫ ==========
 document.getElementById('addGroupBtn').onclick = () => {
     const name = document.getElementById('newGroupName').value.trim();
     if (!name) return alert('Введите название');
-    if (!customGroups[currentSubject]) customGroups[currentSubject] = [];
-    if (customGroups[currentSubject].includes(name) || getDefaultGroups(currentSubject).includes(name)) {
-        return alert('Такая группа уже есть');
+    // Если группа была скрыта – восстанавливаем
+    if (hiddenGroups[currentSubject] && hiddenGroups[currentSubject].includes(name)) {
+        hiddenGroups[currentSubject] = hiddenGroups[currentSubject].filter(g => g !== name);
+        saveHiddenGroups();
+        document.getElementById('newGroupName').value = '';
+        renderGroupList();
+        return;
     }
+    const allVisible = [...new Set([...getDefaultGroups(currentSubject), ...(customGroups[currentSubject] || [])])]
+                        .filter(g => !(hiddenGroups[currentSubject] || []).includes(g));
+    if (allVisible.includes(name)) {
+        return alert('Такая группа уже есть в списке');
+    }
+    if (!customGroups[currentSubject]) customGroups[currentSubject] = [];
     customGroups[currentSubject].push(name);
     saveCustomGroups();
     document.getElementById('newGroupName').value = '';
